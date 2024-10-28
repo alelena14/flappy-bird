@@ -15,18 +15,49 @@ int main() {
     float dt;
     float maxVelocity = 25.f;
     float speedBackground = 10.f;
-     int switchTime = 0;
+    int switchTime = 0;
     int gameStart = 0;
+    //0-not started
+    //1-started
+    //2-ended
     int pipeSpawnRate = 80;
     int score = 0;
     std::vector<bool> pipesPassed;
     pipesPassed.resize(5, false);
 
-    
-    
+    sf::Sprite title;
+    sf::Texture titleTexture;
+    titleTexture.loadFromFile("Textures/FlappyBird.png");
+    title.setTexture(titleTexture);
+    title.setScale(sf::Vector2f(6.f, 6.f));
+    title.setPosition(WINDOWW / 2 - title.getGlobalBounds().width / 2, WINDOWH / 9);
+
+
+    sf::Sprite getReady;
+    sf::Texture getReadyTexture;
+    getReadyTexture.loadFromFile("Textures/GetReady!.png");
+    getReady.setTexture(getReadyTexture);
+    getReady.setScale(sf::Vector2f(4.5f, 4.5f));
+    getReady.setPosition(WINDOWW / 2 - getReady.getGlobalBounds().width / 2, WINDOWH / 8 + title.getGlobalBounds().height);
+
+
+    sf::Sprite startButton;
+    sf::Texture startButtonTexture;
+    startButtonTexture.loadFromFile("Textures/startButton.png");
+    startButton.setTexture(startButtonTexture);
+    startButton.setScale(sf::Vector2f(3.5f, 3.5f));
+    startButton.setPosition(WINDOWW / 2 - startButton.getGlobalBounds().width / 2, WINDOWH / 1.8);
+
+    sf::Sprite gameOver;
+    sf::Texture gameOverTexture;
+    gameOverTexture.loadFromFile("Textures/GameOver.png");
+    gameOver.setTexture(gameOverTexture);
+    gameOver.setScale(sf::Vector2f(6.f, 6.f));
+    gameOver.setPosition(WINDOWW / 2 - gameOver.getGlobalBounds().width / 2, WINDOWH / 2 - gameOver.getGlobalBounds().height);
+
 
     //Background
-    
+
     sf::Texture windowText1;
     sf::Texture windowText2;
 
@@ -70,27 +101,32 @@ int main() {
         //////////////////////Update
 
         //Bird init
-        if(gameStart==1||gameStart==0)
+        if (gameStart == 1 || gameStart == 0)
             bird.animate();
 
-        //Bird movement up-down at the start
-        if (!gameStart)
-            bird.initFly(dt);
         
 
+        if (!gameStart) {
+            bird.initFly(dt);
+           
+        }
+
+
         //Bird movement jump 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && gameStart == 0) {
+        if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Space) || 
+            (sf::Mouse::isButtonPressed(sf::Mouse::Left) && startButton.getGlobalBounds().contains(window.mapPixelToCoords(sf::Mouse::getPosition(window))))
+            ) && gameStart == 0) {
             gameStart = 1;
             bird.tap();
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && gameStart == 1) {
+        if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Space) || sf::Mouse::isButtonPressed(sf::Mouse::Left)) && gameStart == 1) {
             bird.tap();
         }
-       
-        
+
+
         //Pipe movement
-        if(gameStart==1||gameStart==0)
-            pipe.movePipes(dt,maxVelocity);
+        if (gameStart == 1 || gameStart == 0)
+            pipe.movePipes(dt, maxVelocity);
 
         if (gameStart == 1 && pipeSpawnRate >= 80) {
             pipe.randomPipePosition();
@@ -105,10 +141,10 @@ int main() {
 
 
         //Background movement
-        if(gameStart==1||gameStart==0)
+        if (gameStart == 1 || gameStart == 0)
             background.bgMove(dt, maxVelocity);
 
-        if(gameStart==1)
+        if (gameStart == 1)
             bird.fly(dt);
 
         //Collision
@@ -119,28 +155,28 @@ int main() {
             bird.getShape()->setPosition(bird.getShape()->getPosition().x, bird.getShape()->getPosition().y);
             gameStart = 2;
         }
-            
+
         for (size_t i = 0; i < pipe.getPipes().size(); i++)
         {
-            
+
             sf::Rect<float> raux = pipe.getPipes()[i].getGlobalBounds();
             if (raux.intersects(r1))
                 gameStart = 2;
-            
-       
+
+
         }
 
 
         for (size_t j = 0; j < pipe.getScorePipes().size(); j++)
         {
-            if (pipe.getScorePipes()[j].getPosition().x + pipe.getScorePipes()[j].getGlobalBounds().width < bird.getShape()->getPosition().x+bird.getShape()->getGlobalBounds().width) {
+            if (pipe.getScorePipes()[j].getPosition().x + pipe.getScorePipes()[j].getGlobalBounds().width < bird.getShape()->getPosition().x + bird.getShape()->getGlobalBounds().width) {
                 score++;
                 pipe.getScorePipes().erase(pipe.getScorePipes().begin() + j);
             }
 
         }
 
-        
+
 
         if (gameStart == 2) {
             if (r1.intersects(r2) || r1.intersects(r3))
@@ -148,7 +184,7 @@ int main() {
             else
                 bird.fall(dt);
         }
-         
+
 
         //Score
         sf::Text scoreText;
@@ -163,7 +199,7 @@ int main() {
         //Draw
         window.clear();
         window.draw(*background.getSprite3());
-        
+
         for (size_t i = 0; i < pipe.getPipes().size(); i++)
         {
             window.draw(pipe.getPipes()[i]);
@@ -171,7 +207,18 @@ int main() {
         window.draw(*background.getSprite1());
         window.draw(*background.getSprite2());
         window.draw(*bird.getShape());
-        window.draw(scoreText);
+
+        if (!gameStart) {
+            window.draw(title);
+            window.draw(getReady);
+            window.draw(startButton);
+        }
+        else if(gameStart==1)
+            window.draw(scoreText);
+        else {
+            window.draw(scoreText);
+            window.draw(gameOver);
+        }
 
         window.display();
     }
