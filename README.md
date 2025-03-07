@@ -11,7 +11,7 @@ This is a simple Flappy Bird clone developed using **SFML** as part of the Objec
 - 2D graphics with **SFML**
 - Collision detection
 - Real-time score tracking
-- Sounds & animations
+- Animations
 
 ## 📂 Technologies Used
 - **C++**
