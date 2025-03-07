@@ -62,11 +62,3 @@ g++ -std=c++17 -o flappy_bird main.cpp -lsfml-graphics -lsfml-window -lsfml-syst
 3. Set up the linker settings for SFML.
 4. Build and run the project.
 
-
-## 🤝 Contributing
-Feel free to fork this repository and submit pull requests!
-
----
-
-### 🔗 Contact
-For any questions, reach out via [your email] or open an issue in the repository.
